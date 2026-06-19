@@ -1,0 +1,265 @@
+\documentclass[12pt,a4paper]{article}
+
+% ---- Packages ----
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage[style=apa, backend=biber, natbib=true]{biblatex}
+\addbibresource{references.bib}
+
+% ---- Layout ----
+\usepackage[margin=2.5cm]{geometry}
+\setlength{\parskip}{0.5\baselineskip}
+\setlength{\parindent}{1.25cm}
+
+% ---- Code listings ----
+\usepackage{listings}
+\lstset{
+  language=Python,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue!70!black}\bfseries,
+  stringstyle=\color{red!60!black},
+  commentstyle=\color{green!50!black}\itshape,
+  breaklines=true,
+  frame=single,
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  xleftmargin=1.5em,
+  framexleftmargin=1em,
+  showstringspaces=false,
+  tabsize=4,
+  aboveskip=1em,
+  belowskip=0.5em
+}
+
+% ---- Header ----
+\title{PyIndexNum and PyIndexGUI: A Python Toolkit for Index Number Calculation}
+\author{Luigi Palumbo}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+% =============================================================
+\section{Introduction}
+% =============================================================
+
+Price and quantity index numbers are among the most widely used statistical tools in economics. National statistical offices rely on them to compute consumer price indices, producer price indices, and purchasing power parities; researchers deploy them in productivity analysis and international welfare comparisons; and central banks monitor them as core inputs to monetary policy decisions. Despite the centrality of index numbers to economic measurement, the software landscape has long been dominated by R-based solutions. Białek~\autocite{bialek2021statistika} introduced the \texttt{PriceIndices} package, which implements over 100 functions for bilateral and multilateral price index computation in R. Martin~\autocite{martin2020gpindex} contributed the \texttt{gpindex} package, offering a generalised algebraic framework for index numbers that subsumes many standard formulae as special cases. Both packages, however, require R---a language that, while powerful for statistical computing, is less prevalent in data engineering pipelines that increasingly centre on Python.
+
+We present two complementary open-source Python libraries that fill this gap. \textbf{PyIndexNum} is a high-performance library for computing economic index numbers, built on the Polars DataFrame framework~\autocite{nahrstedt2024polars}. It supports eight bilateral indices (Jevons, Carli, Dutot, Laspeyres, Paasche, Fisher, Törnqvist, and Walsh) and five multilateral methods (GEKS-Fisher, GEKS-Törnqvist, GEKS-Jevons, Geary--Khamis, and the Time Product Dummy), together with a suite of extension methods for chaining and splicing. \textbf{PyIndexGUI} is a desktop graphical interface, built with the Flet framework~\autocite{flet2024framework}, that exposes the entire PyIndexNum pipeline through a tabbed point-and-click interface, allowing users who are unfamiliar with programming to prepare data, select methods, compute indices, and export results.
+
+The remainder of this paper is structured as follows. Section~\ref{sec:architecture} describes the technological foundations and design choices underlying both libraries. Section~\ref{sec:preparation} details the data preparation pipeline. Section~\ref{sec:bilateral} presents the bilateral index formulae and their implementation. Section~\ref{sec:multilateral} covers multilateral methods and the extension methods used to maintain temporal coherence. Section~\ref{sec:gui} introduces PyIndexGUI and its interface design. Section~\ref{sec:summary} offers concluding remarks and directions for future development.
+
+% =============================================================
+\section{Architecture and Technology}
+\label{sec:architecture}
+% =============================================================
+
+\subsection{Why Polars?}
+
+PyIndexNum adopts Polars rather than pandas as its data-processing backbone. Polars is a Rust-based DataFrame library with a lazy evaluation engine, multi-threaded query optimisation, and an Apache Arrow memory model~\autocite{nahrstedt2024polars}. For the kinds of panel-dataset operations that index number computation demands---grouped aggregations, joins, pivots, and filtered selections across millions of rows---Polars delivers substantial performance gains over pandas without sacrificing readability. The library requires Python~3.10 or later and can be installed via \texttt{pip} or \texttt{uv}.
+
+\subsection{Why Flet?}
+
+PyIndexGUI is built with Flet~\autocite{flet2024framework}, a Python framework that compiles to Flutter and targets Linux, macOS, Windows, and the web from a single codebase. We chose Flet over alternatives such as Streamlit or Tkinter for two reasons. First, Flet produces native desktop applications rather than browser-based dashboards, which is preferable for users who work with sensitive microdata. Second, Flet's widget set---navigation bars, data tables, dropdown selectors, and tab containers---maps naturally onto the sequential index-number workflow that PyIndexNum implements.
+
+\subsection{Design Principles}
+
+Both libraries adhere to a common set of design principles. The API is deliberately thin: each public function corresponds to a single statistical operation, and every function returns a Polars DataFrame that can be inspected, plotted, or chained into subsequent steps. Type annotations cover the entire public surface, and the test suite exercises each index formula against analytically derived results on small datasets. The libraries are licensed under the permissive MIT licence and hosted on GitHub, with documentation available on ReadTheDocs.
+
+% =============================================================
+\section{Data Preparation}
+\label{sec:preparation}
+% =============================================================
+
+Index number computation requires panel data in which individual products are observed repeatedly over time with associated prices and, for weighted indices, quantities. Real-world datasets rarely arrive in the format that formulae expect, so a reliable preparation pipeline is a prerequisite for reproducible results. PyIndexNum provides three preparation steps---standardisation, temporal aggregation, and panel balancing---each exposed as a standalone function that can be composed flexibly.
+
+\subsection{Standardisation}
+
+The \texttt{standardize\_columns()} function maps user-supplied column names to the canonical schema that all downstream functions expect. A typical dataset might contain columns named \texttt{Date}, \texttt{PRDID}, \texttt{Price}, and \texttt{Qty}; standardisation renames them to \texttt{date}, \texttt{product\_id}, \texttt{price}, and \texttt{quantity} while enforcing the correct Polars data types (dates, strings, and 64-bit floats). This seemingly trivial step eliminates an entire class of user errors and makes the API self-documenting.
+
+\subsection{Temporal Aggregation}
+
+Raw panel data are typically at the transaction level, but index formulae operate on period-level aggregates. The \texttt{aggregate\_time()} function collapses transactions into regular intervals---daily, weekly, monthly, or quarterly---using one of several aggregation strategies. The user may select arithmetic averaging, weighted arithmetic averaging (by expenditure share), or geometric averaging for prices, and summing for quantities. This flexibility is important because the choice of aggregation method interacts with the index formula in subtle ways~\autocite{iLO2004cpimanual}.
+
+\subsection{Panel Balancing and Imputation}
+
+Bilateral formulae compare the same set of products across exactly two periods, while multilateral methods require that every product be observed in every period within a window. Real scanner data are invariably unbalanced: products appear and disappear as assortments change. PyIndexNum offers two complementary strategies. The \texttt{remove\_unbalanced()} function drops products that are absent in any period, yielding a clean but potentially much smaller panel. The \texttt{carry\_forward\_imputation()} function fills missing price observations with the last available price, retaining the full product set at the cost of introducing measurement noise. The appropriate strategy depends on the application, and users are encouraged to consult the CPI Manual's guidelines on treatment of missing products~\autocite{iLO2004cpimanual}.
+
+% =============================================================
+\section{Bilateral Index Numbers}
+\label{sec:bilateral}
+% =============================================================
+
+A bilateral price index compares price levels between two periods, conventionally labelled~0 (base) and~1 (current). Let $p_i^t$ and $q_i^t$ denote, respectively, the price and quantity of product $i = 1, \ldots, N$ in period $t \in \{0, 1\}$. Define the price relative as $r_i = p_i^1 / p_i^0$, the base-period expenditure share $s_i^0 = p_i^0 q_i^0 / \sum_j p_j^0 q_j^0$, and the current-period expenditure share $s_i^1 = p_i^1 q_i^1 / \sum_j p_j^1 q_j^1$. PyIndexNum implements eight bilateral formulae, which we group into unweighted and weighted families.
+
+\subsection{Unweighted Indices}
+
+Unweighted formulae ignore quantities entirely and base the index on price relatives alone. The three classical unweighted formulae are:
+
+\begin{itemize}[nosep]
+  \item \textbf{Jevons index}~\autocite{jevons1865variation} --- the geometric mean of price relatives:
+    \[
+      P_{\mathrm{J}} = \prod_{i=1}^{N} r_i^{\,1/N};
+    \]
+  \item \textbf{Carli index}~\autocite{carli1804valore} --- the arithmetic mean of price relatives:
+    \[
+      P_{\mathrm{C}} = \frac{1}{N} \sum_{i=1}^{N} r_i;
+    \]
+  \item \textbf{Dutot index} --- the ratio of arithmetic mean prices:
+    \[
+      P_{\mathrm{D}} = \frac{\sum_{i=1}^{N} p_i^1}{\sum_{i=1}^{N} p_i^0}.
+    \]
+\end{itemize}
+
+The Jevons index is preferred by most statistical agencies as an elementary index because it satisfies the time-reversal test and does not exhibit the upward bias that characterises the Carli index~\autocite{levell2015carli}. The Dutot index, while intuitive, is sensitive to the units in which prices are quoted and is therefore less commonly used in official statistics.
+
+\subsection{Weighted Indices}
+
+Weighted formulae incorporate quantity information through expenditure shares and span the three classical families of fixed-basket, current-basket, and superlative indices:
+
+\begin{itemize}[nosep]
+  \item \textbf{Laspeyres index}~\autocite{laspeyres1871index} --- fixed base-period basket:
+    \[
+      P_{\mathrm{L}} = \frac{\sum_{i=1}^{N} p_i^1 q_i^0}{\sum_{i=1}^{N} p_i^0 q_i^0}
+                     = \sum_{i=1}^{N} s_i^0 \, r_i;
+    \]
+  \item \textbf{Paasche index}~\autocite{paasche1874preis} --- current-period basket:
+    \[
+      P_{\mathrm{P}} = \frac{\sum_{i=1}^{N} p_i^1 q_i^1}{\sum_{i=1}^{N} p_i^0 q_i^1}
+                     = \left(\sum_{i=1}^{N} \frac{s_i^1}{r_i}\right)^{-1};
+    \]
+  \item \textbf{Fisher ideal index}~\autocite{fisher1922book} --- geometric mean of Laspeyres and Paasche:
+    \[
+      P_{\mathrm{F}} = \sqrt{P_{\mathrm{L}} \cdot P_{\mathrm{P}}};
+    \]
+  \item \textbf{Törnqvist index}~\autocite{tornqvist1936bank} --- weighted geometric mean using average expenditure shares:
+    \[
+      P_{\mathrm{T}} = \prod_{i=1}^{N} r_i^{\,(s_i^0 + s_i^1)/2};
+    \]
+  \item \textbf{Walsh index}~\autocite{walsh1901measurement} --- geometric mean of quantities as basket weights:
+    \[
+      P_{\mathrm{W}} = \frac{\sum_{i=1}^{N} p_i^1 \sqrt{q_i^0 \, q_i^1}}{\sum_{i=1}^{N} p_i^0 \sqrt{q_i^0 \, q_i^1}}.
+    \]
+\end{itemize}
+
+The Fisher, Törnqvist, and Walsh indices are classified as \emph{superlative}~\autocite{diewert1976exact}, meaning they approximate the true cost-of-living index to the second order under flexible functional forms. PyIndexNum computes all five formulae through a single consistent interface: the user passes the prepared DataFrame and selects the method, and the library returns a DataFrame containing the index value alongside the constituent price relatives and weights.
+
+\begin{lstlisting}[caption={Computing a bilateral Fisher index}]
+import polars as pl
+import pyindexnum as pin
+
+df = pin.standardize_columns(df, date_col="Date",
+    price_col="Price", id_col="PRDID",
+    quantity_col="Qty")
+df_agg = pin.aggregate_time(df, freq="1mo")
+df_bal = pin.remove_unbalanced(df_agg)
+result = pin.fisher(df_bal)
+print(result)
+\end{lstlisting}
+
+% =============================================================
+\section{Multilateral Index Numbers and Extension Methods}
+\label{sec:multilateral}
+% =============================================================
+
+Bilateral indices are inherently pairwise, but practical applications typically involve many time periods. Naively chaining bilateral comparisons---computing the index between period~0 and~1, then~1 and~2, and so on---introduces \emph{chain drift}, a phenomenon whereby the chained index diverges from its direct counterpart as the number of links grows~\autocite{vonderlippe2001chain}. Multilateral methods avoid this problem by comparing all periods simultaneously within a window, at the cost of requiring that the comparison set remain fixed.
+
+\subsection{GEKS Indices}
+
+The GEKS method---independently proposed by Gini~\autocite{gini1931circular}, Eltető and Köves~\autocite{elteto1964problem}, and Szulc~\autocite{szulc1964indices}---restores transitivity by taking the geometric mean of all bilateral comparisons between every pair of periods within a window. Given $T$ periods in the window, the GEKS index for period $t$ relative to base period $b$ is:
+
+\[
+  P_{\mathrm{GEKS}}^{b,t} = \prod_{k=0}^{T-1} \left( P^{k,t} / P^{k,b} \right)^{1/T},
+\]
+
+where $P^{k,t}$ is the bilateral index between periods $k$ and $t$. PyIndexNum implements three GEKS variants that differ in the bilateral formula used as the building block: \textbf{GEKS-Fisher} (default, using the Fisher index), \textbf{GEKS-Törnqvist} (using the Törnqvist index), and \textbf{GEKS-Jevons} (using the Jevons index). The GEKS-Jevons variant is noteworthy because it requires only prices---no quantities---making it suitable for contexts where expenditure data are unavailable.
+
+\subsection{Geary--Khamis}
+
+The Geary--Khamis method~\autocite{geary1958note, khamis1972new} takes a fundamentally different approach. Rather than composing bilateral indices, it solves a system of simultaneous equations that yields both a set of international (or inter-temporal) average prices $\mathbf{p}^*$ and a set of purchasing power parity factors $\mathbf{e}$. The system is:
+
+\[
+  p_i^{*} = \frac{\sum_{t=0}^{T-1} p_i^t / e^t q_i^t}{\sum_{t=0}^{T-1} q_i^t}, \qquad
+  e^t = \frac{\sum_{i=1}^{N} p_i^t q_i^t}{\sum_{i=1}^{N} p_i^{*} q_i^t}.
+\]
+
+PyIndexNum solves this system iteratively until convergence. The Geary--Khamis method produces additive results, a property that is valued in purchasing-power-parity work but that comes at the cost of potentially large approximation errors when product mixes differ substantially across periods.
+
+\subsection{Time Product Dummy}
+
+The Time Product Dummy (TPD) approach~\autocite{summers1973international, diewert2005wcpd} reframes the index-number problem as a regression. A logarithmic price equation is estimated:
+
+\[
+  \ln p_{it} = \alpha + \sum_{k=1}^{T-1} \delta_k \, d_k^{\mathrm{time}} + \sum_{j=1}^{N-1} \gamma_j \, d_j^{\mathrm{product}} + \varepsilon_{it},
+\]
+
+where $d_k^{\mathrm{time}}$ and $d_j^{\mathrm{product}}$ are dummy variables for time periods and products, respectively. The estimated coefficients $\hat{\delta}_k$ serve directly as log price indices relative to the omitted base period. PyIndexNum supports both ordinary least squares and weighted least squares (using expenditure shares as weights) estimation. The TPD method is attractive because it naturally handles unbalanced panels---products that are absent in certain periods simply do not contribute observations for those period--product cells~\autocite{dehaan2020tpd}.
+
+\subsection{Extension Methods}
+
+Multilateral indices are defined over fixed windows of periods. To extend them beyond the window, PyIndexNum implements four splicing methods that stitch overlapping windows together. These methods address the fundamental tension between the transitivity of multilateral indices and the need for time-series continuity:
+
+\begin{table}[h]
+\centering
+\caption{Splicing methods implemented in PyIndexNum.}
+\label{tab:splicing}
+\begin{tabular}{@{} l p{7.5cm} @{}}
+\toprule
+Method & Description \\
+\midrule
+Movement splice  & The overlapping period in the new window is re-scaled so that its level matches the previous window, preserving month-to-month movements. \\
+Window splice    & The index in the new window is level-shifted so that the mean of the overlapping period matches the previous window. \\
+Mean splice      & Averages the index values from all overlapping windows at each point in time. \\
+Fixed-base rolling window & Anchors each rolling window to a fixed base, producing a chain that is periodically rebased. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The choice among splicing methods is non-trivial and can materially affect index levels, particularly in the presence of high product turnover~\autocite{dehaan2010eliminating}. PyIndexNum does not prescribe a default; instead, it exposes all four methods and encourages users to compare results.
+
+% =============================================================
+\section{PyIndexGUI}
+\label{sec:gui}
+% =============================================================
+
+While PyIndexNum provides a flexible programmatic interface, many practitioners---particularly those working in statistical agencies without extensive programming expertise---prefer graphical tools that allow interactive exploration of data and methods. PyIndexGUI addresses this need by wrapping the entire PyIndexNum pipeline in a desktop application.
+
+\subsection{Interface Design}
+
+The application is organised as five tabs that mirror the sequential workflow of index number computation:
+
+\begin{enumerate}[nosep]
+  \item \textbf{Data Import} --- users load CSV or Excel files and map their columns to the canonical schema. The application previews the first rows of the dataset and validates data types before proceeding.
+  \item \textbf{Aggregation} --- users select the target temporal frequency and aggregation method. The application displays summary statistics for the aggregated panel, including the number of unique products per period and the coverage ratio.
+  \item \textbf{Panel Balancing} --- users choose whether to drop unbalanced products or apply carry-forward imputation. A bar chart shows the number of available versus matched products per period, making the extent of attrition immediately visible.
+  \item \textbf{Index Calculation} --- users select one or more index formulae from a dropdown list. The application computes the requested indices and displays them in a time-series plot alongside a data table.
+  \item \textbf{Export} --- results and the balanced panel can be exported to CSV or Excel for downstream analysis.
+\end{enumerate}
+
+\subsection{Technology and Distribution}
+
+PyIndexGUI is built with Flet~\autocite{flet2024framework} and can be run in interpreted mode (\texttt{flet run}) during development or compiled to a standalone binary (\texttt{flet build linux}) for distribution. The compiled application does not require a Python installation on the target machine, which simplifies deployment in institutional settings. The application communicates with PyIndexNum through its public API, meaning that any future extensions to the computational library---new index formulae, additional splicing methods, or support for spatial comparisons---become automatically available in the graphical interface.
+
+% =============================================================
+\section{Summary}
+\label{sec:summary}
+% =============================================================
+
+We have introduced PyIndexNum and PyIndexGUI, two open-source Python libraries for economic index number calculation. PyIndexNum implements eight bilateral formulae, five multilateral methods, and four splicing extensions, built on a high-performance Polars backend that scales to the large datasets now common in scanner-data and web-scraped price collection. PyIndexGUI provides a graphical interface to the same functionality, lowering the barrier to entry for non-programmers.
+
+Both libraries are available on GitHub under the MIT licence. The full API reference, tutorial notebooks, and installation instructions are hosted on ReadTheDocs. We welcome contributions of additional index formulae---for example, the Lloyd--Moulton index, the CCDI method, or the FEWS approach---as well as benchmarking studies that compare PyIndexNum's numerical output against established implementations such as PriceIndices~\autocite{bialek2021statistika} and gpindex~\autocite{martin2020gpindex}.
+
+\printbibliography
+
+\end{document}

@@ -1,0 +1,325 @@
+% ============================================================
+% references.bib — Bibliography for PyIndexNum / PyIndexGUI paper
+% Curated: 27 entries validated against paper scope (software package paper)
+% Sources: OpenAlex API + manual entries for historical works
+% ============================================================
+
+% ============================================================
+% 1. Related software packages
+% ============================================================
+
+@article{bialek2021statistika,
+  author = {Jacek Bia\l{}ek},
+  title = {PriceIndices -- a New {R} Package for Bilateral and Multilateral Price Index Calculations},
+  year = {2021},
+  journal = {Statistika: Statistics and Economy Journal},
+  volume = {101},
+  number = {2},
+  pages = {158--175},
+  abstract = {This paper presents the PriceIndices R package, which provides tools for bilateral and multilateral price index calculations. The package covers a wide range of price index formulas including Laspeyres, Paasche, Fisher, T\"{o}rnqvist, Walsh, geometric Laspeyres, geometric Paasche, unit value, and Dutot indices, as well as multilateral methods such as GEKS, CCDI, and Time Product Dummy. The paper serves as the primary reference for the PriceIndices package and describes its data processing capabilities alongside index calculation functions.}
+}
+
+@article{bialek2021priceindices,
+  author = {Jacek Bia\l{}ek},
+  title = {PriceIndices: Calculating Bilateral and Multilateral Price Indexes},
+  year = {2021},
+  doi = {10.32614/cran.package.priceindices},
+  abstract = {This paper describes the PriceIndices R package, which provides a comprehensive framework for computing bilateral and multilateral price indices. The package implements standard formulas including Laspeyres, Paasche, Fisher, Tornqvist, and various unit value indices, as well as multilateral methods like GEKS, CCDI, and time product dummy approaches. Available on CRAN.}
+}
+
+@article{martin2020gpindex,
+  author = {Steve Martin},
+  title = {gpindex: Generalized Price and Quantity Indexes},
+  year = {2020},
+  journal = {The R Journal},
+  volume = {12},
+  number = {1},
+  pages = {373--389},
+  doi = {10.32614/RJ-2020-063},
+  abstract = {The gpindex package provides a flexible and extensible framework for calculating bilateral and multilateral price indexes in R. It uses a generalized approach to index numbers that allows users to define arbitrary price indexes by specifying the contribution of each price relative, covering standard formulas like Laspeyres, Paasche, Fisher, Tornqvist, and GEKS as special cases.}
+}
+
+% ============================================================
+% 2. Historical references — original index number formulae
+% ============================================================
+
+@article{carli1804valore,
+  author = {Gian-Rinaldo Carli},
+  title = {Del Valore e della Proporzione de' Metalli Monetati},
+  year = {1804},
+  journal = {Scrittori Classici Italiani di Economia Politica},
+  volume = {13},
+  pages = {297--366},
+  publisher = {Destefanis},
+  address = {Milano},
+  abstract = {Original work introducing what became known as the Carli price index formula, an arithmetic mean of price relatives. This was one of the earliest formal proposals for measuring price level changes.}
+}
+
+@article{jevons1865variation,
+  author = {William Stanley Jevons},
+  title = {The Variation of Prices and the Value of the Currency Since 1782},
+  year = {1865},
+  journal = {Journal of the Statistical Society of London},
+  volume = {28},
+  pages = {584--614},
+  abstract = {Jevons introduced the geometric mean of price relatives as a price index formula, now known as the Jevons index. He applied this method to study the variation of prices in Britain over the period 1782--1865, demonstrating the advantages of the geometric approach for handling asymmetric price changes.}
+}
+
+@article{laspeyres1871index,
+  author = {Etienne Laspeyres},
+  title = {Die Berechnung einer mittleren Waarenpreissteigerung},
+  year = {1871},
+  journal = {Jahrb\"{u}cher f\"{u}r National\"{o}konomie und Statistik},
+  volume = {16},
+  pages = {296--314},
+  abstract = {Laspeyres introduced the price index formula that bears his name, which uses base-period quantities as weights. The Laspeyres index measures the cost of purchasing a base-period basket of goods at current prices relative to base-period prices.}
+}
+
+@article{paasche1874preis,
+  author = {Hermann Paasche},
+  title = {{\"U}ber die Preisentwicklung der letzten Jahre nach den Hamburger B\"{o}rsennotirungen},
+  year = {1874},
+  journal = {Jahrb\"{u}cher f\"{u}r National\"{o}konomie und Statistik},
+  volume = {23},
+  pages = {168--178},
+  abstract = {Paasche introduced the price index formula that bears his name, which uses current-period quantities as weights. The Paasche index measures the cost of purchasing a current-period basket of goods at current prices relative to base-period prices.}
+}
+
+@article{tornqvist1936bank,
+  author = {Leo T\"{o}rnqvist},
+  title = {The Bank of Finland's Consumption Price Index},
+  year = {1936},
+  journal = {Bank of Finland Monthly Bulletin},
+  volume = {10},
+  pages = {1--8},
+  abstract = {T\"{o}rnqvist introduced the weighted geometric mean of price relatives using average expenditure shares as weights, now known as the T\"{o}rnqvist price index. This formula has become widely used in economic statistics as a superlative index number.}
+}
+
+@book{fisher1922book,
+  author = {Irving Fisher},
+  title = {The Making of Index Numbers: A Study of Their Varieties, Tests, and Reliability},
+  year = {1922},
+  publisher = {Houghton Mifflin},
+  address = {Boston},
+  abstract = {Fisher's seminal work on index numbers in which he systematically studied 134 different index formulae. He introduced the Fisher ideal index (the geometric mean of Laspeyres and Paasche indices) and established tests for evaluating index number properties including time reversal, factor reversal, and circularity tests.}
+}
+
+@book{walsh1901measurement,
+  author = {Correa Moylan Walsh},
+  title = {The Measurement of General Exchange-Value},
+  year = {1901},
+  publisher = {The Macmillan Company},
+  address = {New York},
+  abstract = {Walsh introduced the quantity index formula that uses the geometric mean of quantities from two periods as weights, now known as the Walsh index. This formula is classified as a superlative index and is widely used in multilateral price comparisons.}
+}
+
+% ============================================================
+% 3. Modern index number theory
+% ============================================================
+
+@article{diewert1976exact,
+  author = {Walter E. Diewert},
+  title = {Exact and Superlative Index Numbers},
+  year = {1976},
+  journal = {Journal of Econometrics},
+  volume = {4},
+  number = {2},
+  pages = {115--145},
+  doi = {10.1016/0304-4076(76)90009-9},
+  abstract = {This paper introduces the concept of exact and superlative index numbers. Exact index numbers are defined as index formulae that correspond exactly to specific functional forms for the underlying utility or production function. Superlative index numbers approximate the exact cost-of-living index to the second order and include the Fisher, T\"{o}rnqvist, and Walsh indexes.}
+}
+
+@book{balk2008price,
+  author = {Bert M. Balk},
+  title = {Price and Quantity Index Numbers: Models for Measuring Aggregate Change and Difference},
+  year = {2008},
+  publisher = {Cambridge University Press},
+  address = {Cambridge},
+  doi = {10.1017/cbo9780511720758},
+  abstract = {This book provides a comprehensive treatment of price and quantity index numbers. It covers the economic theory of index numbers, including bilateral and multilateral methods, the axiomatic or test approach, and the use of index numbers in measuring aggregate change and difference. The book bridges theory and practice, making it an essential reference for researchers and practitioners in economic statistics.}
+}
+
+@book{iLO2004cpimanual,
+  author = {{International Labour Organization} and {International Monetary Fund} and {Organisation for Economic Co-operation and Development} and {Statistical Office of the European Communities} and {United Nations Economic Commission for Europe} and {The World Bank}},
+  title = {Consumer Price Index Manual: Theory and Practice},
+  year = {2004},
+  publisher = {International Monetary Fund},
+  address = {Washington, DC},
+  doi = {10.5089/9781589063327.069},
+  abstract = {The Consumer Price Index Manual provides a comprehensive guide to the theory and practice of CPI compilation. It covers conceptual foundations, index formula selection, data collection methods, quality adjustment techniques, and the treatment of new and disappearing products. The manual serves as the primary reference for statistical agencies worldwide.}
+}
+
+% ============================================================
+% 4. GEKS method and multilateral indices
+% ============================================================
+
+@article{gini1931circular,
+  author = {Corrado Gini},
+  title = {On the Circular Test of Index Numbers},
+  year = {1931},
+  journal = {Metron},
+  volume = {9},
+  number = {1},
+  pages = {3--24},
+  abstract = {Gini was among the first to discuss methods for making bilateral price comparisons transitive, an essential property for multilateral comparisons. His work laid the foundation for what later became known as the GEKS method.}
+}
+
+@article{elteto1964problem,
+  author = {O. Eltet\"{o} and P. K\"{o}ves},
+  title = {On a Problem of Index Number Computation Relating to International Comparison},
+  year = {1964},
+  journal = {Statisztikai Szemle},
+  volume = {42},
+  pages = {507--518},
+  abstract = {Eltet\"{o} and K\"{o}ves independently proposed a multilateral comparison method based on the geometric mean of bilateral Fisher indices. This method ensures transitivity in international price comparisons and forms one component of the GEKS approach.}
+}
+
+@article{szulc1964indices,
+  author = {Bohdan J. Szulc},
+  title = {Indices for Multiregional Comparisons},
+  year = {1964},
+  journal = {Przegl\k{a}d Statystyczny},
+  volume = {3},
+  pages = {239--254},
+  abstract = {Szulc independently proposed the same multilateral comparison method as Eltet\"{o} and K\"{o}ves, based on the geometric mean of all bilateral Fisher indices. Together, these three independent proposals form the GEKS method (Gini--Eltet\"{o}--K\"{o}ves--Szulc).}
+}
+
+@article{ivancic2011scanner,
+  author = {Lorraine Ivancic and W. Erwin Diewert and Kevin J. Fox},
+  title = {Scanner Data, Scanner Indices and the Harmonised Index of Consumer Prices},
+  year = {2011},
+  journal = {Journal of Economic and Social Measurement},
+  volume = {36},
+  number = {1--2},
+  pages = {1--38},
+  doi = {10.3233/JEM-2011-0306},
+  abstract = {This paper discusses the use of scanner data in the construction of the Harmonised Index of Consumer Prices (HICP). It examines the properties of various bilateral and multilateral index number formulae when applied to scanner data, including GEKS and time-product-dummy (TPD) approaches, and proposes methods for handling new and disappearing products.}
+}
+
+@article{dehaan2010eliminating,
+  author = {Jan de Haan and Heymerik A. van der Grient},
+  title = {Eliminating Chain Drift in Price Indexes Based on Scanner Data},
+  year = {2010},
+  journal = {Journal of Econometrics},
+  volume = {161},
+  number = {1},
+  pages = {36--46},
+  doi = {10.1016/j.jeconom.2010.05.004},
+  abstract = {This paper addresses the chain drift problem in price indexes constructed from scanner data. It proposes multilateral index methods (specifically the GEKS approach with rolling windows) to eliminate chain drift, demonstrating the superiority of multilateral methods over traditional chained bilateral approaches.}
+}
+
+% ============================================================
+% 5. Geary-Khamis method
+% ============================================================
+
+@article{geary1958note,
+  author = {Robert C. Geary},
+  title = {A Note on the Comparison of Exchange Rates and Purchasing Power Parities Between Countries},
+  year = {1958},
+  journal = {Journal of the Royal Statistical Society. Series A (General)},
+  volume = {121},
+  number = {1},
+  pages = {97--99},
+  abstract = {Geary proposed a method for international price comparisons based on a system of equations that simultaneously determines purchasing power parities and international average prices. This approach ensures additivity and consistency in multilateral comparisons.}
+}
+
+@article{khamis1972new,
+  author = {Shahid Khamis},
+  title = {A New System of Index Numbers for National and International Purposes},
+  year = {1972},
+  journal = {Journal of the Royal Statistical Society. Series A (General)},
+  volume = {135},
+  number = {1},
+  pages = {96--121},
+  abstract = {Khamis developed the Geary-Khamis system of index numbers, providing a rigorous statistical framework for international purchasing power parity comparisons. The method uses a system of simultaneous equations to compute price parities and real quantities that are consistent across countries.}
+}
+
+% ============================================================
+% 6. Time Product Dummy method
+% ============================================================
+
+@article{summers1973international,
+  author = {Robert Summers},
+  title = {International Price Comparisons Based Upon Incomplete Data},
+  year = {1973},
+  journal = {Review of Income and Wealth},
+  volume = {19},
+  number = {1},
+  pages = {1--16},
+  abstract = {Summers proposed the Country Product Dummy (CPD) method for international price comparisons using regression-based approaches. This method uses dummy variables for countries and commodities to estimate price level differences, forming the basis for what later became the Time Product Dummy (TPD) approach.}
+}
+
+@article{diewert2005wcpd,
+  author = {W. Erwin Diewert},
+  title = {Weighted Country Product Dummy Variable Regressions and Index Number Formulae},
+  year = {2005},
+  journal = {Review of Income and Wealth},
+  volume = {51},
+  number = {4},
+  pages = {561--570},
+  doi = {10.1111/j.1475-4991.2005.00168.x},
+  abstract = {This paper establishes the connections between weighted Country Product Dummy (WCPD) regressions and traditional index number formulae. It shows that the WCPD approach is closely related to the Geary-Khamis method and provides a regression-based framework for computing price parities.}
+}
+
+@article{dehaan2020tpd,
+  author = {Jan de Haan and Rens Hendriks and Michael Scholz},
+  title = {Price Measurement Using Scanner Data: Time-Product Dummy Versus Time Dummy Hedonic Indexes},
+  year = {2020},
+  journal = {Review of Income and Wealth},
+  volume = {67},
+  number = {2},
+  pages = {394--417},
+  doi = {10.1111/roiw.12468},
+  abstract = {This paper compares the Time-Product Dummy (TPD) method with the Time Dummy (TD) hedonic approach for constructing price indexes from scanner data. Using Dutch supermarket data, the study finds that both methods produce similar results in many cases but highlights important differences in their treatment of new and disappearing products.}
+}
+
+% ============================================================
+% 7. Chain indices and chain drift
+% ============================================================
+
+@book{vonderlippe2001chain,
+  author = {Peter von der Lippe},
+  title = {Chain Indices: A Study in Price Index Theory},
+  year = {2001},
+  publisher = {Physica-Verlag},
+  address = {Heidelberg},
+  abstract = {This book provides a comprehensive treatment of chain indices in the context of price index theory. It examines the mathematical properties of chained index formulas, discusses chain drift and its consequences, and compares chained versus direct approaches to price index construction.}
+}
+
+% ============================================================
+% 8. Properties of elementary indices
+% ============================================================
+
+@article{levell2015carli,
+  author = {Peter Levell},
+  title = {Is the {Carli} Index Flawed?: Assessing the Case for the New Retail Price Index {RPIJ}},
+  year = {2015},
+  journal = {Journal of the Royal Statistical Society. Series A (Statistics in Society)},
+  volume = {178},
+  number = {2},
+  pages = {303--336},
+  doi = {10.1111/rssa.12061},
+  abstract = {This paper assesses the longstanding claim that the Carli price index is biased upward due to its failure to satisfy the time reversal test. Using theoretical analysis and simulation, the paper examines the conditions under which the Carli index provides accurate measurements of price change and compares it with the Jevons and Dutot alternatives.}
+}
+
+% ============================================================
+% 9. Technology — Polars and Flet
+% ============================================================
+
+@inproceedings{nahrstedt2024polars,
+  author = {Felix Nahrstedt and Mehdi Karmouche and Karolina Bargie\l{} and Pouyeh Banijamali and Apoorva Nalini Pradeep Kumar and Ivano Malavolta},
+  title = {An Empirical Study on the Energy Usage and Performance of {Pandas} and {Polars} Data Analysis {Python} Libraries},
+  year = {2024},
+  booktitle = {Proceedings of the 10th International Conference on Energy Awareness in Software Engineering (EASE)},
+  pages = {58--68},
+  doi = {10.1145/3661167.3661203},
+  abstract = {This paper presents an empirical study comparing the energy usage and performance of Pandas and Polars, two popular data analysis libraries for Python. Using the Greenbench framework, the study measures execution time, memory usage, and energy consumption across various data processing tasks, demonstrating that Polars offers significant performance advantages due to its lazy evaluation model and Rust-based implementation.}
+}
+
+@misc{flet2024framework,
+  author = {{Appveyor Systems Inc.}},
+  title = {{Flet}: Build Realtime Web, Mobile and Desktop Apps in Pure {Python}},
+  year = {2024},
+  howpublished = {\url{https://flet.dev}},
+  abstract = {Flet is a Python framework that enables developers to build real-time web, mobile, and desktop applications using Python. It is built on top of Flutter, allowing rich user interfaces to be created without requiring knowledge of Dart or JavaScript. Flet supports reactive programming patterns and provides a comprehensive widget library including data tables, charts, and navigation controls.}
+}
